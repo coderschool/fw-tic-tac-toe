@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from "react";
 import Board from "./Board";
+import History from "./History";
 
 function Game() {
-  const [squares, setSquares] = useState(Array(9).fill(null));
+  const [history, setHistory] = useState([
+    {
+      squares: Array(9).fill(null),
+    },
+  ]);
+
+  const [stepNumber, setStepNumber] = useState(0);
   const [xIsNext, setXIsNext] = useState(true);
   const [winner, setWinner] = useState(null);
 
   //Declaring a Winner
   useEffect(() => {
-    "Your code here";
-  }, [squares]);
+    const newWinner = calculateWinner(history[history.length - 1].squares);
+    setWinner(newWinner);
+  }, [history]);
 
   //function to check if a player has won.
   //If a player has won, we can display text such as “Winner: X” or “Winner: O”.
@@ -40,12 +48,36 @@ function Game() {
 
   //Handle player
   const handleClick = (i) => {
-    "Your code here";
+    const nowHistory = history.slice(0, stepNumber + 1);
+    const now = nowHistory[nowHistory.length - 1];
+    const squares = now.squares.slice();
+
+    if (calculateWinner(squares) || squares[i]) {
+      return;
+    }
+
+    squares[i] = xIsNext ? "X" : "O";
+
+    setHistory(nowHistory.concat([{ squares: squares }]));
+    setStepNumber(nowHistory.length);
+    setXIsNext((prevState) => !prevState);
+  };
+
+  // Call back game
+  const Walk = (step) => {
+    setStepNumber(step);
+    setXIsNext(step % 2 === 0);
   };
 
   //Restart game
   const handlRestart = () => {
-    "Your code here";
+    setStepNumber(0);
+    setHistory([
+      {
+        squares: Array(9).fill(null),
+      },
+    ]);
+    setXIsNext(true);
   };
 
   return (
@@ -53,9 +85,13 @@ function Game() {
       <h2 className="result">Winner is: {winner ? winner : "N/N"}</h2>
       <div className="game">
         <span className="player">Next player is: {xIsNext ? "X" : "O"}</span>
-        <Board squares={"Your code here"} handleClick={"Your code here"} />
+        <Board
+          squares={history[stepNumber].squares}
+          handleClick={handleClick}
+        />
+        <History history={history} Walk={Walk} />
       </div>
-      <button onClick={"Your code here"} className="restart-btn">
+      <button onClick={handlRestart} className="restart-btn">
         Restart
       </button>
     </div>
